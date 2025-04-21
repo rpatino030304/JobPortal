@@ -1,10 +1,19 @@
-// app/login.jsx
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
-import { router } from 'expo-router';
+import { useNavigation } from '@react-navigation/native'; // Use navigation hook
 
 export default function Login() {
+  const navigation = useNavigation(); // Get the navigation object
+
+  const handleSignIn = () => {
+    // After sign-in, navigate to Personal_Information screen
+    navigation.navigate('Personal_Information'); 
+  };
+
+  const handleSignUpNavigation = () => {
+    navigation.navigate('Register'); // Navigate to Register screen
+  };
+
   return (
     <View style={styles.container}>
       <Image
@@ -19,14 +28,15 @@ export default function Login() {
         <TextInput style={styles.input} placeholder="Email:" placeholderTextColor="#888" />
         <TextInput style={styles.input} placeholder="Password:" placeholderTextColor="#888" secureTextEntry />
 
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/Personal_Info')}>
-  <Text style={styles.buttonText}>Sign In</Text>
-</TouchableOpacity>
-
+        <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+          <Text style={styles.buttonText}>Sign In</Text>
+        </TouchableOpacity>
 
         <Text style={styles.bottomText}>
           Don't Have an Account?{' '}
-          <Link href="/register" style={styles.link}>Sign Up</Link>
+          <TouchableOpacity onPress={handleSignUpNavigation}>
+            <Text style={styles.link}>Sign Up</Text>
+          </TouchableOpacity>
         </Text>
       </View>
     </View>

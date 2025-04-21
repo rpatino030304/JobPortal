@@ -1,8 +1,11 @@
 // app/Personal_Info.jsx
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';  // <-- useNavigation hook
 
 export default function PersonalInfo() {
+  const navigation = useNavigation();  // <-- initialize navigation
+
   return (
     <View style={styles.container}>
       <Image
@@ -30,7 +33,7 @@ export default function PersonalInfo() {
         <TextInput style={styles.input} placeholder="Work Experience:" placeholderTextColor="#888" />
         <TextInput style={styles.input} placeholder="Years of Experience:" placeholderTextColor="#888" />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home')}>
           <Text style={styles.buttonText}>Start Searching →</Text>
         </TouchableOpacity>
       </View>

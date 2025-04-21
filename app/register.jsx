@@ -1,9 +1,14 @@
-// app/register.jsx
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 export default function Register() {
+  const navigation = useNavigation(); // Get the navigation object
+
+  const handleSignInNavigation = () => {
+    navigation.navigate('Login'); // Navigate to Login screen
+  };
+
   return (
     <View style={styles.container}>
       <Image
@@ -26,7 +31,9 @@ export default function Register() {
 
         <Text style={styles.bottomText}>
           Already Have an Account?{' '}
-          <Link href="/login" style={styles.link}>Sign In</Link>
+          <TouchableOpacity onPress={handleSignInNavigation}>
+            <Text style={styles.link}>Sign In</Text>
+          </TouchableOpacity>
         </Text>
       </View>
     </View>
