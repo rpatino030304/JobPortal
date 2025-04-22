@@ -1,9 +1,50 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';  // Import useNavigation hook
-import { Ionicons } from '@expo/vector-icons'; // <-- Make sure this is installed
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { useApp } from './context/AppContext';
 
 export default function JobDetails() {
-  const navigation = useNavigation(); // Create a navigation instance
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { currentUser, saveJob, applyForJob } = useApp();
+  const { job } = route.params;
+  const [isSaving, setIsSaving] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+
+  const handleSave = async () => {
+    if (!currentUser) {
+      Alert.alert('Error', 'Please login to save jobs');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await saveJob(currentUser.id, job.id);
+      Alert.alert('Success', 'Job saved successfully');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save job');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleApply = async () => {
+    if (!currentUser) {
+      Alert.alert('Error', 'Please login to apply for jobs');
+      return;
+    }
+
+    setIsApplying(true);
+    try {
+      await applyForJob(currentUser.id, job.id);
+      Alert.alert('Success', 'Application submitted successfully');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to submit application');
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -17,16 +58,16 @@ export default function JobDetails() {
 
       <View style={styles.card}>
         <View style={styles.jobHeader}>
-          <Text style={styles.jobTitle}>Sr. UX Designer</Text>
-          <Text style={styles.company}>Google</Text>
+          <Text style={styles.jobTitle}>{job.title}</Text>
+          <Text style={styles.company}>{job.company}</Text>
           <View style={styles.tags}>
-            <Text style={styles.tag}>Remote</Text>
-            <Text style={styles.tag}>Freshers</Text>
-            <Text style={styles.tag}>Fulltime</Text>
+            <Text style={styles.tag}>{job.location}</Text>
+            <Text style={styles.tag}>{job.experience}</Text>
+            <Text style={styles.tag}>{job.type}</Text>
           </View>
           <View style={styles.footerRow}>
             <Text style={styles.posted}>Posted 2 days ago</Text>
-            <Text style={styles.salary}>$50K/mo</Text>
+            <Text style={styles.salary}>{job.salary}</Text>
           </View>
         </View>
       </View>
@@ -34,14 +75,13 @@ export default function JobDetails() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>📄 Job Description</Text>
         <Text style={styles.sectionText}>
-          In a UX Designer job, you’ll need both types of skills to develop the next generation of products.
-          You’ll partner with Researchers and Designers to define and deliver new features.
+          {job.description}
         </Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>🛠️ Skills & Requirements</Text>
-        <Text style={styles.sectionText}>• 3 years experience</Text>
+        <Text style={styles.sectionText}>• {job.experience} experience</Text>
         <Text style={styles.sectionText}>• Degree in Computer Science, Psychology, Design or other related fields.</Text>
         <Text style={styles.sectionText}>• Proficiency in User Personas, Competitive Analysis, Empathy Maps and Information Architecture.</Text>
       </View>
@@ -49,11 +89,23 @@ export default function JobDetails() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>👤 Your Role</Text>
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.saveButton}>
-            <Text style={styles.saveButtonText}>Save</Text>
+          <TouchableOpacity
+            style={[styles.saveButton, isSaving && styles.buttonDisabled]}
+            onPress={handleSave}
+            disabled={isSaving}
+          >
+            <Text style={styles.saveButtonText}>
+              {isSaving ? 'Saving...' : 'Save'}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.applyButton}>
-            <Text style={styles.applyButtonText}>Apply Now ➡️</Text>
+          <TouchableOpacity
+            style={[styles.applyButton, isApplying && styles.buttonDisabled]}
+            onPress={handleApply}
+            disabled={isApplying}
+          >
+            <Text style={styles.applyButtonText}>
+              {isApplying ? 'Applying...' : 'Apply Now ➡️'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -61,10 +113,16 @@ export default function JobDetails() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>💡 Benefits</Text>
         <Text style={styles.sectionText}>
-          Lorem ipsum dolor sit amet consectetur. Ut sit tincidunt nec quis vel quisque nunc egestas.
+          • Competitive salary and benefits package
         </Text>
         <Text style={styles.sectionText}>
-          Lorem ipsum dolor sit amet consectetur. Ut sit tincidunt nec quis vel quisque nunc egestas.
+          • Flexible work arrangements
+        </Text>
+        <Text style={styles.sectionText}>
+          • Professional development opportunities
+        </Text>
+        <Text style={styles.sectionText}>
+          • Health and wellness programs
         </Text>
       </View>
     </ScrollView>
@@ -81,12 +139,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Align the back arrow and the header vertically
     marginBottom: 20,
   },
-  backArrow: {
+  backButton: {
     marginRight: 10, // Space between back arrow and the header text
-  },
-  backArrowText: {
-    fontSize: 30,
-    color: '#fff',
   },
   header: {
     color: '#fff',
@@ -181,5 +235,8 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
 });

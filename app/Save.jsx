@@ -1,9 +1,49 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useApp } from './context/AppContext';
 
 export default function Saved() {
   const navigation = useNavigation();
+  const { currentUser, jobs, savedJobs, isLoading } = useApp();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredSavedJobs, setFilteredSavedJobs] = useState([]);
+
+  useEffect(() => {
+    if (savedJobs && jobs) {
+      const savedJobIds = savedJobs.map(saved => saved.jobId);
+      const savedJobDetails = jobs.filter(job => savedJobIds.includes(job.id));
+      setFilteredSavedJobs(savedJobDetails);
+    }
+  }, [savedJobs, jobs]);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text) {
+      const filtered = filteredSavedJobs.filter(job =>
+        job.title.toLowerCase().includes(text.toLowerCase()) ||
+        job.company.toLowerCase().includes(text.toLowerCase()) ||
+        job.location.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredSavedJobs(filtered);
+    } else {
+      const savedJobIds = savedJobs.map(saved => saved.jobId);
+      const savedJobDetails = jobs.filter(job => savedJobIds.includes(job.id));
+      setFilteredSavedJobs(savedJobDetails);
+    }
+  };
+
+  const handleCardClick = (job) => {
+    navigation.navigate('JobDetails', { job });
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#5A31F4" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -13,10 +53,11 @@ export default function Saved() {
       >
         <Text style={styles.userIcon}>👤</Text>
       </TouchableOpacity>
-      <Text style={styles.greeting}>Hello John Doe 👋</Text>
+      <Text style={styles.greeting}>
+        Hello {currentUser?.username || 'Guest'} 👋
+      </Text>
       <Text style={styles.header}>Find Jobs</Text>
 
-      {/* Horizontal tab scroll */}
       <View style={styles.tabScroll}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {['Matched Job', 'Saved', 'Applied', 'News', 'Closed'].map((tab, index) => (
@@ -24,15 +65,10 @@ export default function Saved() {
               key={index}
               style={[styles.tab, tab === 'Saved' && styles.activeTab]}
               onPress={() => {
-                if (tab === 'Matched Job') {
-                  navigation.navigate('Home');
-                } else if (tab === 'Applied') {
-                  navigation.navigate('Applied');
-                } else if (tab === 'News') {
-                  navigation.navigate('News');
-                } else if (tab === 'Closed') {
-                  navigation.navigate('Closed');
-                }
+                if (tab === 'Matched Job') navigation.navigate('Home');
+                else if (tab === 'Applied') navigation.navigate('Applied');
+                else if (tab === 'News') navigation.navigate('News');
+                else if (tab === 'Closed') navigation.navigate('Closed');
               }}
             >
               <Text style={[styles.tabText, tab === 'Saved' && styles.activeTabText]}>
@@ -43,37 +79,56 @@ export default function Saved() {
         </ScrollView>
       </View>
 
-      {/* Search Bar */}
       <View style={styles.searchSection}>
         <TextInput
           placeholder="Search for Jobs..."
           placeholderTextColor="#999"
           style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={handleSearch}
         />
         <TouchableOpacity style={styles.filterButton}>
           <Text style={{ color: '#fff' }}>🔍</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Example Saved Job */}
-      <View style={[styles.jobCard, { backgroundColor: '#5A31F4' }]}>
-        <Text style={styles.jobTitle}>UX Designer</Text>
-        <Text style={styles.company}>Spotify</Text>
-        <View style={styles.tags}>
-          <Text style={styles.tag}>Remote</Text>
-          <Text style={styles.tag}>Freshers</Text>
-          <Text style={styles.tag}>Fulltime</Text>
+      {filteredSavedJobs.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No saved jobs found</Text>
         </View>
-        <Text style={styles.description}>
-          UX Designers are the synthesis of design and development. They take Google’s most innovative product concepts...Read More
-        </Text>
-        <Text style={styles.salary}>$500K/mo</Text>
-      </View>
+      ) : (
+        filteredSavedJobs.map((job) => (
+          <TouchableOpacity
+            key={job.id}
+            onPress={() => handleCardClick(job)}
+          >
+            <View style={[styles.jobCard, { backgroundColor: '#5A31F4' }]}>
+              <Text style={styles.jobTitle}>{job.title}</Text>
+              <Text style={styles.company}>{job.company}</Text>
+              <View style={styles.tags}>
+                <Text style={styles.tag}>{job.location}</Text>
+                <Text style={styles.tag}>{job.experience}</Text>
+                <Text style={styles.tag}>{job.type}</Text>
+              </View>
+              <Text style={styles.description}>
+                {job.description}
+              </Text>
+              <Text style={styles.salary}>{job.salary}</Text>
+            </View>
+          </TouchableOpacity>
+        ))
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1c1c1c',
+  },
   container: {
     backgroundColor: '#1c1c1c',
     padding: 20,
@@ -182,5 +237,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     padding: 10,
     borderRadius: 30,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyStateText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

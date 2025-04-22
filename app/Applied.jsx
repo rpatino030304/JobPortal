@@ -1,11 +1,77 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
-// ... same imports
+import { useApp } from './context/AppContext';
 
 export default function Applied() {
   const navigation = useNavigation();
+  const { currentUser, jobs, appliedJobs, isLoading } = useApp();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredAppliedJobs, setFilteredAppliedJobs] = useState([]);
+
+  useEffect(() => {
+    if (appliedJobs && jobs) {
+      const appliedJobIds = appliedJobs.map(applied => applied.jobId);
+      const appliedJobDetails = jobs.filter(job => appliedJobIds.includes(job.id));
+      setFilteredAppliedJobs(appliedJobDetails);
+    }
+  }, [appliedJobs, jobs]);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text) {
+      const appliedJobIds = appliedJobs.map(applied => applied.jobId);
+      const appliedJobDetails = jobs.filter(job => appliedJobIds.includes(job.id));
+      const filtered = appliedJobDetails.filter(job =>
+        job.title.toLowerCase().includes(text.toLowerCase()) ||
+        job.company.toLowerCase().includes(text.toLowerCase()) ||
+        job.location.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredAppliedJobs(filtered);
+    } else {
+      const appliedJobIds = appliedJobs.map(applied => applied.jobId);
+      const appliedJobDetails = jobs.filter(job => appliedJobIds.includes(job.id));
+      setFilteredAppliedJobs(appliedJobDetails);
+    }
+  };
+
+  const handleCardClick = (job) => {
+    navigation.navigate('JobDetails', { job });
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return '#F4B400';
+      case 'approved':
+        return '#186915';
+      case 'rejected':
+        return '#D92626';
+      default:
+        return '#5A31F4';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'Pending';
+      case 'approved':
+        return 'Approved';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return 'Unknown';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#5A31F4" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -15,7 +81,9 @@ export default function Applied() {
       >
         <Text style={styles.userIcon}>👤</Text>
       </TouchableOpacity>
-      <Text style={styles.greeting}>Hello John Doe 👋</Text>
+      <Text style={styles.greeting}>
+        Hello {currentUser?.username || 'Guest'} 👋
+      </Text>
       <Text style={styles.header}>Find Jobs</Text>
 
       <View style={styles.tabScroll}>
@@ -40,68 +108,61 @@ export default function Applied() {
       </View>
 
       <View style={styles.searchSection}>
-        <TextInput placeholder="Search for Jobs..." placeholderTextColor="#999" style={styles.searchInput} />
+        <TextInput
+          placeholder="Search for Jobs..."
+          placeholderTextColor="#999"
+          style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
         <TouchableOpacity style={styles.filterButton}>
           <Text style={{ color: '#fff' }}>🔍</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Pending Card */}
-      <View style={[styles.jobCard, { backgroundColor: '#F4B400' }]}>
-  <Text style={styles.jobTitle}>Frontend Developer</Text>
-  <Text style={styles.company}>Amazon</Text>
-  <View style={styles.tags}>
-    <Text style={styles.tag}>Remote</Text>
-    <Text style={styles.tag}>1-2 years</Text>
-    <Text style={styles.tag}>Fulltime</Text>
-  </View>
-  <Text style={styles.description}>
-    Your application is under review. The employer will get back to you shortly.
-  </Text>
-  <Text style={styles.salary}>$40K/mo</Text>
-  <Text style={styles.statusLabel}>Pending</Text>
-</View>
-
-
-      {/* Approved Card */}
-      <View style={[styles.jobCard, { backgroundColor: '#186915' }]}>
-  <Text style={styles.jobTitle}>Backend Engineer</Text>
-  <Text style={styles.company}>Meta</Text>
-  <View style={styles.tags}>
-    <Text style={styles.tag}>New York</Text>
-    <Text style={styles.tag}>3-5 years</Text>
-    <Text style={styles.tag}>Contract</Text>
-  </View>
-  <Text style={styles.description}>
-    Congratulations! Your application has been approved. Check your email for next steps.
-  </Text>
-  <Text style={styles.salary}>$55K/mo</Text>
-  <Text style={styles.statusLabel}>Approved</Text>
-</View>
-
-
-      {/* Rejected Card */}
-      <View style={[styles.jobCard, { backgroundColor: '#D92626' }]}>
-  <Text style={styles.jobTitle}>UI Engineer</Text>
-  <Text style={styles.company}>Netflix</Text>
-  <View style={styles.tags}>
-    <Text style={styles.tag}>San Francisco</Text>
-    <Text style={styles.tag}>2-4 years</Text>
-    <Text style={styles.tag}>Contract</Text>
-  </View>
-  <Text style={styles.description}>
-    Unfortunately, this position is no longer available or your application was not selected.
-  </Text>
-  <Text style={styles.salary}>$60K/mo</Text>
-  <Text style={styles.statusLabel}>Rejected</Text>
-</View>
-
+      {filteredAppliedJobs.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No applied jobs found</Text>
+        </View>
+      ) : (
+        filteredAppliedJobs.map((job) => {
+          const application = appliedJobs.find(app => app.jobId === job.id);
+          return (
+            <TouchableOpacity
+              key={job.id}
+              onPress={() => handleCardClick(job)}
+            >
+              <View style={[styles.jobCard, { backgroundColor: getStatusColor(application.status) }]}>
+                <Text style={styles.jobTitle}>{job.title}</Text>
+                <Text style={styles.company}>{job.company}</Text>
+                <View style={styles.tags}>
+                  <Text style={styles.tag}>{job.location}</Text>
+                  <Text style={styles.tag}>{job.experience}</Text>
+                  <Text style={styles.tag}>{job.type}</Text>
+                </View>
+                <Text style={styles.description}>
+                  {application.status === 'pending' && 'Your application is under review. The employer will get back to you shortly.'}
+                  {application.status === 'approved' && 'Congratulations! Your application has been approved. Check your email for next steps.'}
+                  {application.status === 'rejected' && 'Unfortunately, this position is no longer available or your application was not selected.'}
+                </Text>
+                <Text style={styles.salary}>{job.salary}</Text>
+                <Text style={styles.statusLabel}>{getStatusText(application.status)}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })
+      )}
     </ScrollView>
   );
 }
 
-
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1c1c1c',
+  },
   container: {
     backgroundColor: '#1c1c1c',
     padding: 20,
@@ -222,5 +283,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     padding: 10,
     borderRadius: 30,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyStateText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

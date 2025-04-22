@@ -1,32 +1,66 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   ScrollView,
-  StyleSheet
+  StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useApp } from './context/AppContext';
 
 export default function Home() {
   const navigation = useNavigation();
+  const { currentUser, jobs, isLoading } = useApp();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredJobs, setFilteredJobs] = useState([]);
 
-  const handleCardClick = () => {
-    navigation.navigate('JobDetails');
+  useEffect(() => {
+    if (jobs) {
+      setFilteredJobs(jobs);
+    }
+  }, [jobs]);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text) {
+      const filtered = jobs.filter(job =>
+        job.title.toLowerCase().includes(text.toLowerCase()) ||
+        job.company.toLowerCase().includes(text.toLowerCase()) ||
+        job.location.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredJobs(filtered);
+    } else {
+      setFilteredJobs(jobs);
+    }
   };
+
+  const handleCardClick = (job) => {
+    navigation.navigate('JobDetails', { job });
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#5A31F4" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity
-  style={styles.userIconContainer}
-  onPress={() => navigation.navigate('UserInfo')}
->
-  <Text style={styles.userIcon}>👤</Text>
-</TouchableOpacity>
+        style={styles.userIconContainer}
+        onPress={() => navigation.navigate('UserInfo')}
+      >
+        <Text style={styles.userIcon}>👤</Text>
+      </TouchableOpacity>
 
-
-      <Text style={styles.greeting}>Hello John Doe 👋</Text>
+      <Text style={styles.greeting}>
+        Hello {currentUser?.username || 'Guest'} 👋
+      </Text>
       <Text style={styles.header}>Find Jobs</Text>
 
       <View style={styles.tabScroll}>
@@ -55,85 +89,63 @@ export default function Home() {
           placeholder="Search for Jobs..."
           placeholderTextColor="#999"
           style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={handleSearch}
         />
         <TouchableOpacity style={styles.filterButton}>
           <Text style={{ color: '#fff' }}>🔍</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Job Card 1 */}
-      <TouchableOpacity onPress={handleCardClick}>
-        <View style={[styles.jobCard, { backgroundColor: '#5A31F4' }]}>
-          <Text style={styles.jobTitle}>UX Designer</Text>
-          <Text style={styles.company}>Google</Text>
-          <View style={styles.tags}>
-            <Text style={styles.tag}>New York</Text>
-            <Text style={styles.tag}>3 years exp.</Text>
-            <Text style={styles.tag}>Fulltime</Text>
+      {filteredJobs.map((job) => (
+        <TouchableOpacity
+          key={job.id}
+          onPress={() => handleCardClick(job)}
+        >
+          <View style={[styles.jobCard, { backgroundColor: '#5A31F4' }]}>
+            <Text style={styles.jobTitle}>{job.title}</Text>
+            <Text style={styles.company}>{job.company}</Text>
+            <View style={styles.tags}>
+              <Text style={styles.tag}>{job.location}</Text>
+              <Text style={styles.tag}>{job.experience}</Text>
+              <Text style={styles.tag}>{job.type}</Text>
+            </View>
+            <Text style={styles.description}>
+              {job.description}
+            </Text>
+            <Text style={styles.salary}>{job.salary}</Text>
           </View>
-          <Text style={styles.description}>
-            UX Designers are the synthesis of design and development. They take Google’s most innovative product concepts...Read More
-          </Text>
-          <Text style={styles.salary}>$50K/mo</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Job Card 2 */}
-      <TouchableOpacity onPress={handleCardClick}>
-        <View style={[styles.jobCard, { backgroundColor: '#D92626' }]}>
-          <Text style={styles.jobTitle}>Project Manager</Text>
-          <Text style={styles.company}>Airbnb</Text>
-          <View style={styles.tags}>
-            <Text style={styles.tag}>Sydney</Text>
-            <Text style={styles.tag}>1-5 years exp.</Text>
-            <Text style={styles.tag}>Part-time</Text>
-          </View>
-          <Text style={styles.description}>
-            Airbnb was born in 2007 when two Hosts welcomed three guests to their San Francisco home...Read More
-          </Text>
-          <Text style={styles.salary}>$25K/mo</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Job Card 3 */}
-      <TouchableOpacity onPress={handleCardClick}>
-        <View style={[styles.jobCard, { backgroundColor: '#F4B400' }]}>
-          <Text style={styles.jobTitle}>Graphic Designer</Text>
-          <Text style={styles.company}>Spotify</Text>
-          <View style={styles.tags}>
-            <Text style={styles.tag}>Remote</Text>
-            <Text style={styles.tag}>Freshers</Text>
-            <Text style={styles.tag}>Fulltime</Text>
-          </View>
-          <Text style={styles.description}>
-            UX Designers are the synthesis of design and development. They take Google’s most innovative product concepts...Read More
-          </Text>
-          <Text style={styles.salary}>$500K/mo</Text>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      ))}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  tabScroll: {
-    marginBottom: 20
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1c1c1c',
   },
   container: {
     backgroundColor: '#1c1c1c',
     padding: 20,
-    flexGrow: 1
+    flexGrow: 1,
   },
   greeting: {
     color: '#fff',
     fontSize: 18,
-    marginBottom: 10
+    marginBottom: 10,
   },
   header: {
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20
+    marginBottom: 20,
+  },
+  tabScroll: {
+    marginBottom: 20,
   },
   tab: {
     paddingVertical: 6,
@@ -141,23 +153,23 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#333',
     marginRight: 8,
-    marginBottom: 8
+    marginBottom: 8,
   },
   activeTab: {
-    backgroundColor: '#5A31F4'
+    backgroundColor: '#5A31F4',
   },
   tabText: {
     color: '#bbb',
-    fontSize: 13
+    fontSize: 13,
   },
   activeTabText: {
     color: '#fff',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   searchSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20
+    marginBottom: 20,
   },
   searchInput: {
     flex: 1,
@@ -165,33 +177,33 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 15,
     color: '#fff',
-    height: 40
+    height: 40,
   },
   filterButton: {
     backgroundColor: '#5A31F4',
     padding: 10,
     borderRadius: 8,
-    marginLeft: 10
+    marginLeft: 10,
   },
   jobCard: {
     borderRadius: 16,
     padding: 15,
-    marginBottom: 15
+    marginBottom: 15,
   },
   jobTitle: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 4
+    marginBottom: 4,
   },
   company: {
     color: '#eee',
-    marginBottom: 8
+    marginBottom: 8,
   },
   tags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 8
+    marginBottom: 8,
   },
   tag: {
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -200,17 +212,21 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     marginRight: 6,
     color: '#fff',
-    fontSize: 12
+    fontSize: 12,
   },
   description: {
     color: '#ddd',
-    marginBottom: 10
+    marginBottom: 10,
   },
   salary: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-    textAlign: 'right'
+    textAlign: 'right',
+  },
+  userIcon: {
+    fontSize: 20,
+    color: '#fff',
   },
   userIconContainer: {
     position: 'absolute',
@@ -221,9 +237,4 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 30,
   },
-  userIcon: {
-    fontSize: 20,
-    color: '#fff',
-  },
-  
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { AppProvider } from './context/AppContext';
 import Login from './login';
 import Home from './home';
 import JobDetails from './JobDetails';
@@ -15,17 +16,19 @@ const Stack = createNativeStackNavigator();
 
 export default function _layout() {
   return (
-    <Stack.Navigator initialRouteName="Login">
-      <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-      <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
-      <Stack.Screen name="JobDetails" component={JobDetails} options={{ headerShown: false }} />
-      <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
-      <Stack.Screen name="Personal_Information" component={PersonalInfo} options={{ headerShown: false }} />
-      <Stack.Screen name="Save" component={Save} options={{ headerShown: false }} />
-      <Stack.Screen name="Applied" component={Applied} options={{ headerShown: false }} />
-      <Stack.Screen name="News" component={News} options={{ headerShown: false }} />
-      <Stack.Screen name="Closed" component={Closed} options={{ headerShown: false }} />
-      <Stack.Screen name="UserInfo" component={UserInfo} options={{ headerShown: false }} />
-    </Stack.Navigator>
+    <AppProvider>
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+        <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+        <Stack.Screen name="JobDetails" component={JobDetails} options={{ headerShown: false }} />
+        <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
+        <Stack.Screen name="Personal_Information" component={PersonalInfo} options={{ headerShown: false }} />
+        <Stack.Screen name="Save" component={Save} options={{ headerShown: false }} />
+        <Stack.Screen name="Applied" component={Applied} options={{ headerShown: false }} />
+        <Stack.Screen name="News" component={News} options={{ headerShown: false }} />
+        <Stack.Screen name="Closed" component={Closed} options={{ headerShown: false }} />
+        <Stack.Screen name="UserInfo" component={UserInfo} options={{ headerShown: false }} />
+      </Stack.Navigator>
+    </AppProvider>
   );
 }
