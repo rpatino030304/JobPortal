@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useApp } from './context/AppContext';
 
 export default function Closed() {
   const navigation = useNavigation();
+  const { currentUser } = useApp();
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -11,9 +13,22 @@ export default function Closed() {
         style={styles.userIconContainer}
         onPress={() => navigation.navigate('UserInfo')}
       >
-        <Text style={styles.userIcon}>👤</Text>
+        {currentUser?.profilePicture ? (
+          <Image
+            source={{ uri: currentUser.profilePicture }}
+            style={styles.profileImage}
+          />
+        ) : (
+          <View style={styles.defaultAvatar}>
+            <Text style={styles.userIcon}>
+              {currentUser?.username?.charAt(0)?.toUpperCase() || '👤'}
+            </Text>
+          </View>
+        )}
       </TouchableOpacity>
-      <Text style={styles.greeting}>Hello John Doe 👋</Text>
+      <Text style={styles.greeting}>
+        Hello {currentUser?.username || 'Guest'} 👋
+      </Text>
       <Text style={styles.header}>Find Jobs</Text>
 
       <View style={styles.tabScroll}>
@@ -157,10 +172,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'right',
   },
-  userIcon: {
-    fontSize: 20,
-    color: '#fff',
-  },
   userIconContainer: {
     position: 'absolute',
     top: 20,
@@ -169,5 +180,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     padding: 10,
     borderRadius: 30,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
+  defaultAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#5A31F4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userIcon: {
+    fontSize: 16,
+    color: '#fff',
   },
 });
