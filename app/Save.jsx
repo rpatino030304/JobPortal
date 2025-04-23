@@ -105,7 +105,8 @@ export default function Saved() {
 
       {filteredSavedJobs.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>No saved jobs found</Text>
+          <Text style={styles.emptyStateText}>No saved jobs</Text>
+          <Text style={styles.emptyStateSubText}>Save jobs to view them here</Text>
         </View>
       ) : (
         filteredSavedJobs.map((job) => (
@@ -271,10 +272,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    marginTop: 50,
   },
   emptyStateText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  emptyStateSubText: {
+    color: '#aaa',
+    fontSize: 14,
     textAlign: 'center',
   },
 });

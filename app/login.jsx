@@ -5,29 +5,31 @@ import { useApp } from './context/AppContext';
 
 export default function Login() {
   const navigation = useNavigation();
-  const { login } = useApp();
+  const { login, setCurrentUser } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = async () => {
+  const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Please enter both email and password');
       return;
     }
 
-    setIsLoading(true);
     try {
-      const success = await login(email, password);
-      if (success) {
-        navigation.navigate('Home');
+      const user = await login(email, password);
+      if (user) {
+        setCurrentUser(user);
+        if (user.role === 'admin') {
+          navigation.navigate('AdminDashboard');
+        } else {
+          navigation.navigate('Home');
+        }
       } else {
         Alert.alert('Error', 'Invalid email or password');
       }
     } catch (error) {
-      Alert.alert('Error', 'An error occurred during login');
-    } finally {
-      setIsLoading(false);
+      Alert.alert('Error', 'Failed to login. Please try again.');
     }
   };
 
@@ -66,7 +68,7 @@ export default function Login() {
 
         <TouchableOpacity
           style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleSignIn}
+          onPress={handleLogin}
           disabled={isLoading}
         >
           <Text style={styles.buttonText}>

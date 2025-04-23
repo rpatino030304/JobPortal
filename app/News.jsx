@@ -59,17 +59,9 @@ export default function News() {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.jobCard, { backgroundColor: '#616161' }]}>
-        <Text style={styles.jobTitle}>Tech Hiring Booms in 2025</Text>
-        <Text style={styles.company}>By TechCrunch</Text>
-        <View style={styles.tags}>
-          <Text style={styles.tag}>Industry</Text>
-          <Text style={styles.tag}>Trends</Text>
-        </View>
-        <Text style={styles.description}>
-          The demand for skilled software engineers, designers, and AI specialists has skyrocketed in Q1 2025... Read More
-        </Text>
-        <Text style={styles.salary}>🕒 3h ago</Text>
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyStateText}>No news available</Text>
+        <Text style={styles.emptyStateSubText}>Check back later for the latest job market updates</Text>
       </View>
     </ScrollView>
   );
@@ -201,5 +193,24 @@ const styles = StyleSheet.create({
   userIcon: {
     fontSize: 16,
     color: '#fff',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginTop: 50,
+  },
+  emptyStateText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  emptyStateSubText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });

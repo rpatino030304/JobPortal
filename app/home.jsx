@@ -109,26 +109,33 @@ export default function Home() {
         </TouchableOpacity>
       </View>
 
-      {filteredJobs.map((job) => (
-        <TouchableOpacity
-          key={job.id}
-          onPress={() => handleCardClick(job)}
-        >
-          <View style={[styles.jobCard, { backgroundColor: '#5A31F4' }]}>
-            <Text style={styles.jobTitle}>{job.title}</Text>
-            <Text style={styles.company}>{job.company}</Text>
-            <View style={styles.tags}>
-              <Text style={styles.tag}>{job.location}</Text>
-              <Text style={styles.tag}>{job.experience}</Text>
-              <Text style={styles.tag}>{job.type}</Text>
+      {filteredJobs.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No matched jobs available at the moment</Text>
+          <Text style={styles.emptyStateSubText}>Check back later for new job postings</Text>
+        </View>
+      ) : (
+        filteredJobs.map((job) => (
+          <TouchableOpacity
+            key={job.id}
+            onPress={() => handleCardClick(job)}
+          >
+            <View style={[styles.jobCard, { backgroundColor: '#5A31F4' }]}>
+              <Text style={styles.jobTitle}>{job.title}</Text>
+              <Text style={styles.company}>{job.company}</Text>
+              <View style={styles.tags}>
+                <Text style={styles.tag}>{job.location}</Text>
+                <Text style={styles.tag}>{job.experience}</Text>
+                <Text style={styles.tag}>{job.type}</Text>
+              </View>
+              <Text style={styles.description}>
+                {job.description}
+              </Text>
+              <Text style={styles.salary}>{job.salary}</Text>
             </View>
-            <Text style={styles.description}>
-              {job.description}
-            </Text>
-            <Text style={styles.salary}>{job.salary}</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
+          </TouchableOpacity>
+        ))
+      )}
     </ScrollView>
   );
 }
@@ -265,5 +272,24 @@ const styles = StyleSheet.create({
   userIcon: {
     fontSize: 16,
     color: '#fff',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginTop: 50,
+  },
+  emptyStateText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  emptyStateSubText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });

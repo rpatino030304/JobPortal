@@ -133,7 +133,8 @@ export default function Applied() {
 
       {filteredAppliedJobs.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>No applied jobs found</Text>
+          <Text style={styles.emptyStateText}>No applied jobs</Text>
+          <Text style={styles.emptyStateSubText}>Apply to jobs to track your applications here</Text>
         </View>
       ) : (
         filteredAppliedJobs.map((job) => {
@@ -317,10 +318,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    marginTop: 50,
   },
   emptyStateText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  emptyStateSubText: {
+    color: '#aaa',
+    fontSize: 14,
     textAlign: 'center',
   },
 });

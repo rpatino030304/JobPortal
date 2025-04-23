@@ -11,6 +11,7 @@ import Applied from './Applied';  // Add this import
 import News from './News';        // Add this import
 import Closed from './Closed';    // Add this import
 import UserInfo from './userinfo'; // adjust path if needed
+import AdminDashboard from './AdminDashboard';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,7 @@ export default function _layout() {
         <Stack.Screen name="News" component={News} options={{ headerShown: false }} />
         <Stack.Screen name="Closed" component={Closed} options={{ headerShown: false }} />
         <Stack.Screen name="UserInfo" component={UserInfo} options={{ headerShown: false }} />
+        <Stack.Screen name="AdminDashboard" component={AdminDashboard} options={{ headerShown: false }} />
       </Stack.Navigator>
     </AppProvider>
   );

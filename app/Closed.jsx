@@ -59,17 +59,9 @@ export default function Closed() {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.jobCard, { backgroundColor: '#5A31F4' }]}>
-        <Text style={styles.jobTitle}>Frontend Developer</Text>
-        <Text style={styles.company}>Netflix</Text>
-        <View style={styles.tags}>
-          <Text style={styles.tag}>Los Angeles</Text>
-          <Text style={styles.tag}>Closed</Text>
-        </View>
-        <Text style={styles.description}>
-          This job position was recently closed and is no longer accepting applications.
-        </Text>
-        <Text style={styles.salary}>⛔ Closed</Text>
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyStateText}>No closed jobs</Text>
+        <Text style={styles.emptyStateSubText}>Closed job positions will appear here</Text>
       </View>
     </ScrollView>
   );
@@ -201,5 +193,24 @@ const styles = StyleSheet.create({
   userIcon: {
     fontSize: 16,
     color: '#fff',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginTop: 50,
+  },
+  emptyStateText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  emptyStateSubText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
